@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 export const getUsersForAdmin = async (req, res) => {
     try {
         const  loggedUser = req.user
-        const FilteredUsers = await User.find({ _id: { $ne: loggedUser._id } });
+        const FilteredUsers = await User.find({ _id: { $ne: loggedUser._id } }).select("-password");
 
         res.status(200).json(FilteredUsers)
         
