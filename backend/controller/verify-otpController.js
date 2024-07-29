@@ -13,11 +13,16 @@ export const verifyOtp = async (req, res) => {
         }
 
         // Check OTP validity
-        if (user.otp !== otp || Date.now() > user.otpExpiresAt) {
+        if ( Date.now() > user.otpExpiresAt) {
             return res.status(400).json({ error: "Invalid OTP" });
         }
 
+        if (user.otp !== otp) {
+            return res.status(400).json({ error: "WORONG OTP" });
+        }
+
         // Clear OTP fields
+        const validOtpUser = true
         user.otp = undefined;
         user.otpExpiresAt = undefined;
         await user.save();
@@ -30,6 +35,8 @@ export const verifyOtp = async (req, res) => {
                 fullName: user.FullName,
                 username: user.username,
                 role: user.role,
+                validOtpUser,
+
             });
         }
 

@@ -35,7 +35,8 @@ export const login = async (req, res) => {
         await sendEmail(user.Email, emailSubject, emailBody);
 
         res.status(200).json({
-            message: `OTP sent to your email ${user.Email}`
+            username: user.username,
+            message: ` ${user.username} OTP sent to your email `,
         });
     } catch (error) {
         console.log('Error in login controller:', error.message);
