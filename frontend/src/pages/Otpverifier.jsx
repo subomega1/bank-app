@@ -1,43 +1,9 @@
-import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import CopyRight from '../components/CopyRight';
+import useVerifierOtp from '../hooks/useVerifierOtp'; // Import the custom hook
 
 function Otpverifier() {
-  const [seconds, setSeconds] = useState(0);
-  const [minutes, setMinutes] = useState(5);
-  const [isDisabled, setIsDisabled] = useState(false);
-
-  useEffect(() => {
-    setIsDisabled(true); // Automatically start the timer on mount
-  }, []);
-
-  useEffect(() => {
-    let myInterval;
-
-    if (isDisabled) {
-      myInterval = setInterval(() => {
-        if (seconds > 0) {
-          setSeconds(seconds - 1);
-        }
-        if (seconds === 0) {
-          if (minutes === 0) {
-            clearInterval(myInterval);
-          } else {
-            setMinutes(minutes - 1);
-            setSeconds(59);
-          }
-        }
-      }, 1000);
-    }
-
-    return () => {
-      clearInterval(myInterval);
-    };
-  }, [seconds, minutes, isDisabled]);
-
-  const startTimer = () => {
-    setIsDisabled(true);
-  };
+  const { otp, setOtp, seconds, minutes, handleVerify } = useVerifierOtp(); // Destructure from the custom hook
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -48,7 +14,10 @@ function Otpverifier() {
             <h1 className="text-3xl font-semibold text-center text-black">
               <span className="text-success">AmenBank</span>
             </h1>
-            <form>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleVerify(); // Call the verification function on form submission
+            }}>
               <div className="mb-3">
                 <label className="label p-2">
                   <span className="text-base label-text pl-5">The OTP has been sent to your email</span>
@@ -57,20 +26,22 @@ function Otpverifier() {
                   type="text"
                   placeholder="Enter OTP"
                   className="input input-bordered input-success w-full max-w-xs"
+                  value={otp} // Controlled input
+                  onChange={(e) => setOtp(e.target.value)} // Update OTP state
                 />
               </div>
               <div className="mb-3">
                 <p className="text-center text-gray-700">
-                  {`Time remaining: ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`}
+                  {`Time remaining: ${minutes}m ${seconds}s`}
                 </p>
               </div>
               <div>
                 <button
+                  type="submit"
                   className="btn btn-outline btn-success w-full"
-                  disabled={isDisabled}
-                  onClick={startTimer}
+                  disabled={minutes === 0 && seconds === 0} // Disable if time is up
                 >
-                  {'Login'}
+                  Verify OTP
                 </button>
               </div>
             </form>

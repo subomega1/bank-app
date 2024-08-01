@@ -18,7 +18,14 @@ export const login = async (req, res) => {
             return res.status(400).json({ error: "Invalid username or password" });
         }
 
-        // Generate OTP
+        // Clear existing OTP if present
+        if (user.otp || user.otpExpiresAt) {
+            user.otp = undefined;
+            user.otpExpiresAt = undefined;
+            await user.save();
+        }
+
+        // Generate new OTP
         const otp = speakeasy.totp({
             secret: user.otpSecret, // Use a secret stored in your user document
             encoding: 'base32',
@@ -28,18 +35,19 @@ export const login = async (req, res) => {
         user.otp = otp;
         user.otpExpiresAt = Date.now() + 300000; // 5 minutes from now
         await user.save();
-        
+
         // Send OTP via Email
         const emailSubject = 'Your OTP Code';
         const emailBody = `Your verification code is ${otp}. It is valid for 5 minutes.`;
         await sendEmail(user.Email, emailSubject, emailBody);
 
         res.status(200).json({
+            otpExpiresAt: user.otpExpiresAt,
             username: user.username,
-            message: ` ${user.username} OTP sent to your email `,
+            message: `OTP sent to ${user.username}'s email`,
         });
     } catch (error) {
-        console.log('Error in login controller:', error.message);
+        console.error('Error in login controller:', error.message);
         res.status(500).json({ error: 'Internal server error' });
     }
 };

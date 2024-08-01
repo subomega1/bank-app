@@ -22,7 +22,7 @@ export const verifyOtp = async (req, res) => {
         }
 
         // Clear OTP fields
-        const validOtpUser = true
+    
         user.otp = undefined;
         user.otpExpiresAt = undefined;
         await user.save();
@@ -35,7 +35,7 @@ export const verifyOtp = async (req, res) => {
                 fullName: user.FullName,
                 username: user.username,
                 role: user.role,
-                validOtpUser,
+                
 
             });
         }
@@ -54,7 +54,7 @@ export const verifyOtp = async (req, res) => {
             fullName: user.FullName,
             username: user.username,
             role: user.role,
-            userBalance: `${userBalance.balance} Dt`,
+            userBalance: `${userBalance.balance} `,
         });
     } catch (error) {
         console.log("Error in verifyOtp controller:", error.message);

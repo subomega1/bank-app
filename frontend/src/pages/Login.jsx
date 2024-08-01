@@ -1,20 +1,20 @@
 import Header from "../components/Header";
 import CopyRight from "../components/CopyRight";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import useLogin from "../hooks/useLogin";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
     const { loading, login } = useLogin();
-    const navigate = useNavigate(); // Initialize useNavigate
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = await login({ username, password }); // Pass an object to login
+        const { success } = await login({ username, password });
         if (success) {
-            navigate('/otpverifier'); // Navigate to OTP verifier on successful login
+            navigate('/otpverifier');
         }
     };
 

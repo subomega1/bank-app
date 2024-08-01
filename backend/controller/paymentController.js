@@ -45,6 +45,7 @@ export const payment = async (req, res) => {
             senderUsername,
             receiverUsername,
             amount,
+
         });
         await payment.save();
 
@@ -52,6 +53,7 @@ export const payment = async (req, res) => {
             senderUsername: payment.senderUsername,
             receiverUsername: payment.receiverUsername,
             amount: payment.amount,
+            senderNewBalance: senderBalance.balance,
         });
     } catch (error) {
         console.error("Error in payment controller:", error.message); // Use console.error for errors

@@ -1,12 +1,18 @@
 import { useState } from "react";
 import Header from "../components/Header";
+import { BiLogOut } from "react-icons/bi";
+import useLogout from "../hooks/useLogout";
+import { useAuthContext } from "../context/AuthContext";
+import useSendMoney from "../hooks/useSendMonney";
 
 function User() {
   // State to manage form visibility and input values
+  const { loading, handleLogout } = useLogout(); // Ensure `logout` function is available
+  const { authUser } = useAuthContext();
   const [showForm, setShowForm] = useState(false);
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [balance, setBalance] = useState(100); // User's current balance
+  const { loadingM, sendMoney } = useSendMoney();
 
   // Handle showing/hiding the form
   const toggleForm = () => {
@@ -28,7 +34,21 @@ function User() {
 
   // Check if the entered amount exceeds the current balance
   const isAmountExceeding = () => {
-    return parseFloat(amount) > balance;
+    const amountValue = parseFloat(amount) || 0;
+    return amountValue > parseFloat(authUser.userBalance);
+  };
+
+  // Calculate balance after transaction
+  const calculateBalanceAfterTransaction = () => {
+    const amountValue = parseFloat(amount) || 0;
+    return (parseFloat(authUser.userBalance) - amountValue).toFixed(2);
+  };
+
+  // Handle send money form submission
+  const handleSendMoney = async (e) => {
+    e.preventDefault();
+    await sendMoney(recipient, parseFloat(amount));
+    toggleForm();
   };
 
   return (
@@ -39,7 +59,7 @@ function User() {
           <div className="w-full p-6 rounded-lg shadow-md bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-0">
             <h1 className="text-3xl font-semibold text-center text-black">
               Welcome
-              <span className="text-success"> User</span>
+              <span className="text-success"> {authUser.fullName}</span>
             </h1>
             <div className="flex flex-col w-full mt-5">
               <div className="flex justify-between">
@@ -60,17 +80,26 @@ function User() {
             <div className="divider my-1 py-2"></div>
             <div className="flex justify-between mt-5">
               <p className="text-2xl font-semibold text-center text-black">
-                user
+                {authUser.username} {/* Display logged-in user's username */}
               </p>
               <p className="text-2xl font-semibold text-center text-black">
-                user
+                {authUser.fullName} {/* Display logged-in user's full name */}
               </p>
               <p className="text-2xl font-semibold text-center text-black">DT</p>
               <p className="text-2xl font-semibold text-center text-black">
-                {balance.toFixed(2)}
+                {authUser.userBalance}
               </p>
             </div>
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center items-center mt-8">
+              {loading ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                <BiLogOut
+                  className="w-6 h-6 text-success cursor-pointer"
+                  onClick={handleLogout}
+                  aria-label="Logout"
+                />
+              )}
               <button
                 className="btn btn-outline btn-success ml-auto"
                 onClick={toggleForm}
@@ -81,12 +110,13 @@ function User() {
 
             {/* Form for sending money */}
             {showForm && (
-              <div className="mt-8 p-4 border border-gray-300 rounded-lg">
+              <form
+                className="mt-8 p-4 border border-gray-300 rounded-lg"
+                onSubmit={handleSendMoney}
+              >
                 <h2 className="text-xl font-semibold mb-4">Send Money</h2>
                 <div className="mb-4">
-                  <label className="block text-base font-medium mb-2">
-                    To
-                  </label>
+                  <label className="block text-base font-medium mb-2">To</label>
                   <input
                     type="text"
                     className="input input-bordered w-full"
@@ -113,19 +143,22 @@ function User() {
                     }`}
                   >
                     {isAmountExceeding()
-                      ? "No enough money"
-                      : `Balance after transaction: ${(balance - amount).toFixed(
-                          2
-                        )}`}
+                      ? "Not enough money"
+                      : `Balance after transaction: ${calculateBalanceAfterTransaction()}`}
                   </p>
                 </div>
                 <button
+                  type="submit"
                   className="btn btn-outline btn-success w-full"
                   disabled={isAmountExceeding() || !recipient || !amount}
                 >
-                  Confirm
+                  {loadingM ? (
+                    <span className="loading loading-spinner"></span>
+                  ) : (
+                    "Send Money"
+                  )}
                 </button>
-              </div>
+              </form>
             )}
           </div>
         </div>

@@ -23,7 +23,6 @@ const useLogin = () => {
             });
 
             if (!res.ok) {
-                // Handle non-200 responses (e.g., 400 or 500)
                 const errorData = await res.json();
                 toast.error(errorData.error || 'Login failed');
                 return { success: false };
