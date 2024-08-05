@@ -47,7 +47,14 @@ function User() {
   // Handle send money form submission
   const handleSendMoney = async (e) => {
     e.preventDefault();
-    await sendMoney(recipient, parseFloat(amount));
+
+    const amountValue = parseFloat(amount);
+    if (isNaN(amountValue) || amountValue <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+
+    await sendMoney(recipient, amountValue);
     toggleForm();
   };
 
@@ -131,6 +138,7 @@ function User() {
                   </label>
                   <input
                     type="number"
+                    step="0.01" // Allows two decimal places
                     className="input input-bordered w-full"
                     value={amount}
                     min={0}
